@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 class Player(BaseModel):
     name: str = Field(max_length=25)
     jersey_number: int = Field(gt=0, lt=1000)
-    total_runs: int = Field(default=0)
+    total_runs: int = Field(default=0, ge=0)
 
 
 class TeamAddModel(BaseModel):
@@ -13,7 +13,7 @@ class TeamAddModel(BaseModel):
     HomeCity: str
     HomeGroundName: str
     TotalTrophies: int
-    players: list[Player] = [Player(name="defaultName", jersey_number=1, total_runs=0)]
+    players: list[Player] = []
 
 
 class Team(TeamAddModel):

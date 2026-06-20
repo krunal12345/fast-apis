@@ -5,6 +5,13 @@
         "HomeCity": "bangluru",
         "HomeGroundName": "chinnaswami",
         "TotalTrophies": 2,
+        "players": [
+            {
+                "name": "virat kohli 2",
+                "jersey_number": 18,
+                "total_runs": 21000
+            }
+        ],
         "id": 1
     },
     {

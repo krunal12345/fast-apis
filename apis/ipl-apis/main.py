@@ -1,6 +1,7 @@
+from email import message
 from typing import Annotated
-from fastapi import FastAPI, HTTPException, Path, Query
-from schemas.teamSchema import TeamAddModel, Team
+from fastapi import Body, FastAPI, HTTPException, Path, Query
+from schemas.teamSchema import Player, TeamAddModel, Team
 import services.team_service as TeamService
 from exceptions.team_exceptions import TeamAlreadyExistsError
 
@@ -23,7 +24,7 @@ async def get_teams(
         int | None, Query(description="Filter teams by Id", gt=0, lt=14)
     ] = None,
 ) -> list[Team]:
-    data = await TeamService.loadTeamData()
+    data = TeamService.load_team_data()
     if team_Id:
         team = TeamService.get_team_by_id(team_Id)
         return [team] if team else []
@@ -48,8 +49,20 @@ def get_team_by_id(
 
 
 @app.post("/team", description="create a new team by passing valid team object")
-async def addTeam(teamDetails: TeamAddModel):
+def add_team(teamDetails: TeamAddModel):
     try:
-        await TeamService.addTeam(teamDetails)
+        TeamService.add_eam(teamDetails)
     except TeamAlreadyExistsError as e:
         raise HTTPException(status_code=409, detail=e.message)
+
+
+@app.put("/players/{team_id}", description="add a players to the team By Team Id")
+def add_players(
+    team_id: Annotated[int, Path(..., gt=0, lt=14)],
+    players: Annotated[list[Player], Body(embed=True)],
+):
+    team = TeamService.get_team_by_id(team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team with given Id found")
+    else:
+        TeamService.add_players_by_teamid(team_id, players)
