@@ -34,7 +34,14 @@ async def get_teams(
 @app.get("/teams/{team_id}")
 def get_team_by_id(
     team_id: Annotated[
-        int, Path(..., description="pass the valid team Id", gt=0, lt=14)
+        int,
+        Path(
+            ...,
+            title="Id of the team to Get",
+            description="pass the valid team Id",
+            gt=0,
+            lt=14,
+        ),
     ],
 ) -> Team | None:
     return TeamService.get_team_by_id(team_id)

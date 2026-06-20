@@ -22,5 +22,20 @@
         "HomeGroundName": "chepauk",
         "TotalTrophies": 6,
         "id": 3
+    },
+    {
+        "name": "Rajasthan royals",
+        "shortName": "RR",
+        "HomeCity": "jaipur",
+        "HomeGroundName": "Any",
+        "TotalTrophies": 1,
+        "players": [
+            {
+                "name": "vaibhav suryanshi",
+                "jersey_number": 1,
+                "total_runs": 1000
+            }
+        ],
+        "id": 4
     }
 ]

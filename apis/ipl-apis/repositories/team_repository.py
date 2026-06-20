@@ -13,7 +13,9 @@ def loadTeamsData() -> list[Team]:
 
 def saveJsondata(data: list[Team]):
     with open(TEAMS_FILE, "w") as f:
-        json.dump([item.model_dump() for item in data], f, indent=4)
+        json.dump(
+            [item.model_dump(exclude_defaults=True) for item in data], f, indent=4
+        )
 
 
 def find_by_name(name: str) -> Team | None:
