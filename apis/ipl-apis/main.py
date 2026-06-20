@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from schemas.teamSchema import TeamAddModel, Team
 import services.team_service as TeamService
+from exceptions.team_exceptions import TeamAlreadyExistsError
 
 app = FastAPI()
 
@@ -22,4 +23,7 @@ async def get_teams() -> list[Team]:
 
 @app.post("/team")
 async def addTeam(teamDetails: TeamAddModel):
-    await TeamService.addTeam(teamDetails)
+    try:
+        await TeamService.addTeam(teamDetails)
+    except TeamAlreadyExistsError as e:
+        raise HTTPException(status_code=409, detail=e.message)

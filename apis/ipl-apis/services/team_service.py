@@ -10,6 +10,6 @@ async def loadTeamData():
 async def addTeam(team: TeamAddModel):
     teamInDB = teamRepo.find_by_name(team.name)
     if teamInDB:
-        raise TeamAlreadyExistsError(f"Team with {team.name} already exists")
+        raise TeamAlreadyExistsError(team.name)
 
     teamRepo.addTeam(team)
