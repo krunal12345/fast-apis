@@ -1,9 +1,9 @@
-from schemas.teamSchema import TeamAddModel
+from schemas.teamSchema import TeamAddModel, Team
 import repositories.team_repository as teamRepo
 from exceptions.team_exceptions import TeamAlreadyExistsError
 
 
-async def loadTeamData():
+async def loadTeamData() -> list[Team]:
     return teamRepo.loadTeamsData()
 
 
@@ -13,3 +13,7 @@ async def addTeam(team: TeamAddModel):
         raise TeamAlreadyExistsError(team.name)
 
     teamRepo.addTeam(team)
+
+
+def get_team_by_id(id: int):
+    return teamRepo.find_by_id(id)

@@ -6,5 +6,21 @@
         "HomeGroundName": "chinnaswami",
         "TotalTrophies": 2,
         "id": 1
+    },
+    {
+        "name": "Mumbain indians",
+        "shortName": "MI",
+        "HomeCity": "mumbai",
+        "HomeGroundName": "vankhede",
+        "TotalTrophies": 5,
+        "id": 2
+    },
+    {
+        "name": "Chennai super kings",
+        "shortName": "CSK",
+        "HomeCity": "Chennai",
+        "HomeGroundName": "chepauk",
+        "TotalTrophies": 6,
+        "id": 3
     }
 ]

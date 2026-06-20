@@ -21,6 +21,11 @@ def find_by_name(name: str) -> Team | None:
     return next((t for t in data if t.name == name), None)
 
 
+def find_by_id(id: int) -> Team | None:
+    data = loadTeamsData()
+    return next((t for t in data if t.id == id), None)
+
+
 def addTeam(team: TeamAddModel):
     data = loadTeamsData()
     teamId = data[-1].id + 1 if data else 1
