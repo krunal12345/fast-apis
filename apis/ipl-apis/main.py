@@ -1,8 +1,10 @@
-from email import message
 from typing import Annotated
 from fastapi import Body, FastAPI, HTTPException, Path, Query
+from exceptions.user_exceptions import UserAlreadyExistsError
 from schemas.teamSchema import Player, TeamAddModel, Team
+from schemas.user_models import UserBase, UserInput
 import services.team_service as TeamService
+import services.user_service as user_service
 from exceptions.team_exceptions import TeamAlreadyExistsError
 
 app = FastAPI()
@@ -71,3 +73,18 @@ def add_players(
         raise HTTPException(status_code=404, detail="Team with given Id found")
     else:
         TeamService.add_players_by_teamid(team_id, players)
+
+
+@app.get("/users", response_model=list[UserBase], tags=["Users"])
+def get_users():
+    return user_service.get_users()
+
+
+@app.post("/user", tags=["Users"])
+def add_user(
+    userItem: Annotated[UserInput, Body(description="user model to add in the system")],
+):
+    try:
+        user_service.add_user(userItem)
+    except UserAlreadyExistsError as e:
+        raise HTTPException(status_code=409, detail=e.message)
