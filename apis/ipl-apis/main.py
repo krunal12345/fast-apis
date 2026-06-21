@@ -1,11 +1,12 @@
-from typing import Annotated
-from fastapi import Body, FastAPI, HTTPException, Path, Query
-from exceptions.user_exceptions import UserAlreadyExistsError
+from typing import Annotated, Any
+from fastapi import Body, Depends, FastAPI, HTTPException, Path, Query, status
+from exceptions.user_exceptions import InvalidCredentialsError, UserAlreadyExistsError
 from schemas.teamSchema import Player, TeamAddModel, Team
-from schemas.user_models import UserBase, UserInput
+from schemas.user_models import Tokens, UserBase, UserInput, UserLoginInput
 import services.team_service as TeamService
 import services.user_service as user_service
 from exceptions.team_exceptions import TeamAlreadyExistsError
+from utils.user_utils import validate_jwt_token
 
 app = FastAPI()
 
@@ -76,15 +77,27 @@ def add_players(
 
 
 @app.get("/users", response_model=list[UserBase], tags=["Users"])
-def get_users():
+def get_users(userCreds: Annotated[Any, Depends(validate_jwt_token)]):
+    print(f"creds are {userCreds}")
     return user_service.get_users()
 
 
 @app.post("/user", tags=["Users"])
 def add_user(
     userItem: Annotated[UserInput, Body(description="user model to add in the system")],
+    userCreds: Annotated[Any, Depends(validate_jwt_token)],
 ):
     try:
         user_service.add_user(userItem)
     except UserAlreadyExistsError as e:
         raise HTTPException(status_code=409, detail=e.message)
+
+
+@app.post("/login", response_model=Tokens, tags=["Auth"])
+def login(
+    user: Annotated[UserLoginInput, Body(description="pass valid email and password")],
+):
+    try:
+        return user_service.login(user)
+    except InvalidCredentialsError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)

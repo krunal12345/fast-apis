@@ -13,3 +13,13 @@ class User(UserBase):
 
 class UserInput(UserBase):
     password: str
+
+
+class UserLoginInput(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class Tokens(BaseModel):
+    accees_token: str
+    refresh_token: str | None = None
