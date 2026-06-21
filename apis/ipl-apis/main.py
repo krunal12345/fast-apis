@@ -18,7 +18,12 @@ def health():
     return {"ok"}
 
 
-@app.get("/teams", description="get all the ipl teams")
+@app.get(
+    "/teams",
+    description="get all the ipl teams",
+    response_model=list[Team],
+    response_model_exclude_unset=True,
+)
 async def get_teams(
     team_Id: Annotated[
         int | None, Query(description="Filter teams by Id", gt=0, lt=14)

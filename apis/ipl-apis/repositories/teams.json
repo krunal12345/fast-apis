@@ -20,7 +20,8 @@
         "HomeCity": "mumbai",
         "HomeGroundName": "vankhede",
         "TotalTrophies": 5,
-        "id": 2
+        "id": 2,
+        "players": []
     },
     {
         "name": "Chennai super kings",
