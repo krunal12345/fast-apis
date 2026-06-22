@@ -11,6 +11,8 @@ from utils.user_utils import get_current_user, validate_jwt_token
 
 app = FastAPI()
 
+user = Annotated[UserBase, Depends(get_current_user)]
+
 
 @app.get("/")
 def read_root():
@@ -29,7 +31,7 @@ def health():
     response_model_exclude_unset=True,
 )
 async def get_teams(
-    user: Annotated[UserBase, Depends(get_current_user)],
+    user: user,
     team_Id: Annotated[
         int | None,
         Query(description="Filter teams by Id", gt=0, lt=14),
@@ -45,6 +47,7 @@ async def get_teams(
 
 @app.get("/teams/{team_id}")
 def get_team_by_id(
+    user: user,
     team_id: Annotated[
         int,
         Path(
@@ -60,7 +63,7 @@ def get_team_by_id(
 
 
 @app.post("/team", description="create a new team by passing valid team object")
-def add_team(teamDetails: TeamAddModel):
+def add_team(teamDetails: TeamAddModel, user: user):
     try:
         TeamService.add_eam(teamDetails)
     except TeamAlreadyExistsError as e:
@@ -69,6 +72,7 @@ def add_team(teamDetails: TeamAddModel):
 
 @app.put("/players/{team_id}", description="add a players to the team By Team Id")
 def add_players(
+    user: user,
     team_id: Annotated[int, Path(..., gt=0, lt=14)],
     players: Annotated[list[Player], Body(embed=True)],
 ):
@@ -80,15 +84,14 @@ def add_players(
 
 
 @app.get("/users", response_model=list[UserBase], tags=["Users"])
-def get_users(userCreds: Annotated[Any, Depends(validate_jwt_token)]):
-    print(f"creds are {userCreds}")
+def get_users(user: user):
     return user_service.get_users()
 
 
 @app.post("/user", tags=["Users"])
 def add_user(
+    user: user,
     userItem: Annotated[UserInput, Body(description="user model to add in the system")],
-    userCreds: Annotated[Any, Depends(validate_jwt_token)],
 ):
     try:
         user_service.add_user(userItem)
