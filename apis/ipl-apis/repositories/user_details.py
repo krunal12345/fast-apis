@@ -1,18 +1,25 @@
 import json
 from pathlib import Path
 
+from sqlmodel import Session, select
+
 from schemas.user_models import User
+from utils.user_utils import get_db_session
 
 USERS_FILE = Path(__file__).parent / "users.json"
 
 
-def load_users() -> list[User]:
-    with open(USERS_FILE, "r") as f:
-        data = json.load(f)
-        if data:
-            return [User.model_validate(x) for x in data]
-        else:
-            return []
+# def load_users() -> list[User]:
+#     with open(USERS_FILE, "r") as f:
+#         data = json.load(f)
+#         if data:
+#             return [User.model_validate(x) for x in data]
+#         else:
+#             return []
+
+
+def load_users(session: Session):
+    return session.exec(select(User)).all()
 
 
 def add_user(user: User):

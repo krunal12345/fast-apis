@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Generator
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import (
@@ -9,6 +9,25 @@ from fastapi.security import (
 import jwt
 
 from schemas.user_models import UserBase
+from sqlmodel import SQLModel, Session, create_engine
+
+database_name = "ipldatabase.db"
+database_url = f"sqlite:///{database_name}"
+connect_args = {"check_same_thread": False}
+engine = create_engine(database_url, connect_args=connect_args)
+
+
+def get_db_session() -> Generator[Session, None, None]:
+    with Session(engine) as session:
+        try:
+            yield session
+        finally:
+            session.close()
+
+
+def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)
+
 
 security = HTTPBearer()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

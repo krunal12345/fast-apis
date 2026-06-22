@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 from fastapi import Body, Depends, FastAPI, HTTPException, Path, Query, status
 from exceptions.user_exceptions import InvalidCredentialsError, UserAlreadyExistsError
 from fastapi.security import OAuth2PasswordRequestForm
@@ -7,11 +7,16 @@ from schemas.user_models import Tokens, UserBase, UserInput
 import services.team_service as TeamService
 import services.user_service as user_service
 from exceptions.team_exceptions import TeamAlreadyExistsError
-from utils.user_utils import get_current_user, validate_jwt_token
+from utils.user_utils import create_db_and_tables, get_current_user
 
 app = FastAPI()
 
 user = Annotated[UserBase, Depends(get_current_user)]
+
+
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
 
 
 @app.get("/")
