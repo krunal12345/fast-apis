@@ -1,12 +1,13 @@
 from typing import Annotated, Any
 from fastapi import Body, Depends, FastAPI, HTTPException, Path, Query, status
 from exceptions.user_exceptions import InvalidCredentialsError, UserAlreadyExistsError
+from fastapi.security import OAuth2PasswordRequestForm
 from schemas.teamSchema import Player, TeamAddModel, Team
-from schemas.user_models import Tokens, UserBase, UserInput, UserLoginInput
+from schemas.user_models import Tokens, UserBase, UserInput
 import services.team_service as TeamService
 import services.user_service as user_service
 from exceptions.team_exceptions import TeamAlreadyExistsError
-from utils.user_utils import validate_jwt_token
+from utils.user_utils import get_current_user, validate_jwt_token
 
 app = FastAPI()
 
@@ -28,8 +29,10 @@ def health():
     response_model_exclude_unset=True,
 )
 async def get_teams(
+    user: Annotated[UserBase, Depends(get_current_user)],
     team_Id: Annotated[
-        int | None, Query(description="Filter teams by Id", gt=0, lt=14)
+        int | None,
+        Query(description="Filter teams by Id", gt=0, lt=14),
     ] = None,
 ) -> list[Team]:
     data = TeamService.load_team_data()
@@ -93,11 +96,11 @@ def add_user(
         raise HTTPException(status_code=409, detail=e.message)
 
 
-@app.post("/login", response_model=Tokens, tags=["Auth"])
+@app.post("/token", response_model=Tokens, tags=["Auth"])
 def login(
-    user: Annotated[UserLoginInput, Body(description="pass valid email and password")],
+    form: Annotated[OAuth2PasswordRequestForm, Depends()],
 ):
     try:
-        return user_service.login(user)
+        return user_service.login(form)
     except InvalidCredentialsError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)

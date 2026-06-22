@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta
 
+from fastapi.security import OAuth2PasswordRequestForm
+
 from exceptions.user_exceptions import (
     InvalidCredentialsError,
     UserAlreadyExistsError,
 )
-from schemas.user_models import Tokens, UserInput, User, UserLoginInput
+from schemas.user_models import Tokens, UserInput, User
 import repositories.user_details as user_repo
 import bcrypt
 import jwt
@@ -40,8 +42,8 @@ def add_user(user: UserInput):
     user_repo.add_user(user_add)
 
 
-def login(user: UserLoginInput) -> Tokens:
-    user_db = user_repo.get_user_by_email(user.email)
+def login(user: OAuth2PasswordRequestForm) -> Tokens:
+    user_db = user_repo.get_user_by_email(user.username)
     if not user_db:
         raise InvalidCredentialsError()
     else:
@@ -52,12 +54,13 @@ def login(user: UserLoginInput) -> Tokens:
 
         token = jwt.encode(
             {
+                "id": user_db.id,
                 "sub": user_db.email,
-                "user-name": user_db.name,
+                "username": user_db.name,
                 "exp": datetime.now() + timedelta(minutes=10),
             },
             "JustRandomJWTLearningString",
             "HS256",
         )
 
-        return Tokens(accees_token=token)
+        return Tokens(access_token=token, token_type="bearer")

@@ -21,5 +21,6 @@ class UserLoginInput(BaseModel):
 
 
 class Tokens(BaseModel):
-    accees_token: str
+    access_token: str
+    token_type: str
     refresh_token: str | None = None
