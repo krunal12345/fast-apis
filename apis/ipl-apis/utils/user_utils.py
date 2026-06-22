@@ -28,14 +28,10 @@ def validate_jwt_token(credentials: HTTPAuthorizationCredentials = Depends(secur
 
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserBase:
 
-    print(token)
-
     claims = jwt.decode(
         token,
         "JustRandomJWTLearningString",
         algorithms=["HS256"],
     )
-
-    print(claims)
 
     return UserBase(id=claims["id"], email=claims["sub"], name=claims["username"])
