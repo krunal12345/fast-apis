@@ -1,36 +1,32 @@
-import json
-from pathlib import Path
-from schemas.teamSchema import Team, TeamAddModel
+from sqlalchemy.orm import selectinload
+from sqlmodel import Session, select
 
-TEAMS_FILE = Path(__file__).parent / "teams.json"
-
-
-def load_teams_data() -> list[Team]:
-    with open(TEAMS_FILE, "r") as f:
-        raw = json.load(f)  # list of dicts
-        return [Team.model_validate(item) for item in raw]  # list of Team objects
+from models.team_models import Team, Player
+from repositories.abstract_repository import AbstractTeamRepository
 
 
-def save_teams_data(data: list[Team]):
-    with open(TEAMS_FILE, "w") as f:
-        json.dump(
-            [item.model_dump(exclude_defaults=True) for item in data], f, indent=4
+class TeamRepository(AbstractTeamRepository):
+    def __init__(self, session: Session):
+        self.session = session
+
+    def get_all(self) -> list[Team]:
+        return list(
+            self.session.exec(select(Team).options(selectinload(Team.players))).all()
         )
 
+    def get_by_id(self, id: int) -> Team | None:
+        return self.session.exec(
+            select(Team).where(Team.id == id).options(selectinload(Team.players))
+        ).first()
 
-def find_by_name(name: str) -> Team | None:
-    data = load_teams_data()
-    return next((t for t in data if t.name == name), None)
+    def get_by_name(self, name: str) -> Team | None:
+        return self.session.exec(select(Team).where(Team.name == name)).first()
 
+    def add(self, team: Team) -> Team:
+        self.session.add(team)
+        return team
 
-def find_by_id(id: int) -> Team | None:
-    data = load_teams_data()
-    return next((t for t in data if t.id == id), None)
-
-
-def addTeam(team: TeamAddModel):
-    data = load_teams_data()
-    teamId = data[-1].id + 1 if data else 1
-    data.append(Team(id=teamId, **team.model_dump()))
-    save_teams_data(data)
-    return
+    def add_players(self, team: Team, players: list[Player]) -> None:
+        for player in players:
+            player.team_id = team.id
+            self.session.add(player)
