@@ -1,14 +1,7 @@
-from typing import Annotated
-
-from fastapi import Body, Depends, FastAPI, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import FastAPI
 
 from routers import users, teams, auth
 
-from exceptions.user_exceptions import InvalidCredentialsError, UserAlreadyExistsError
-from models.user_models import Tokens, UserInput
-import services.user_service as user_service
-from utils.dependencies import UoWDep
 from utils.user_utils import create_db_and_tables
 
 app = FastAPI()
