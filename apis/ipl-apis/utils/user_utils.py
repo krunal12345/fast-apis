@@ -5,6 +5,7 @@ from fastapi.security import (
     HTTPBearer,
     HTTPAuthorizationCredentials,
     OAuth2PasswordBearer,
+    SecurityScopes,
 )
 import jwt
 
@@ -26,7 +27,10 @@ def create_db_and_tables():
 
 
 security = HTTPBearer()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="token",
+    scopes={"teams": "you can access teams", "users": "you can access users"},
+)
 
 
 def validate_jwt_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
@@ -41,16 +45,38 @@ def validate_jwt_token(credentials: HTTPAuthorizationCredentials = Depends(secur
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserBase:
+def get_current_user(
+    security_scopes: SecurityScopes, token: Annotated[str, Depends(oauth2_scheme)]
+) -> UserBase:
     try:
         claims = jwt.decode(
             token,
             "JustRandomJWTLearningString",
             algorithms=["HS256"],
         )
-        return UserBase(id=claims["id"], email=claims["sub"], name=claims["username"])
+
+        token_scopes: str = claims.get("scopes", "")
+        scopes: list[str] = token_scopes.split(" ")
+
     except Exception:
+        print("came into the expection")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
         )
+
+    if not scopes:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="valid scope is not provided",
+        )
+
+    for scope in security_scopes.scopes:
+        print(scope not in scopes, "condition")
+        if scope not in scopes:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="valid scope is not provided",
+            )
+
+    return UserBase(id=claims["id"], email=claims["sub"], name=claims["username"])

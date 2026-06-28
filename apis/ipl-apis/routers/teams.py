@@ -1,13 +1,24 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, HTTPException, Path, Query, status
+from fastapi import (
+    APIRouter,
+    Body,
+    HTTPException,
+    Path,
+    Query,
+    Security,
+    status,
+)
 
 from exceptions.team_exceptions import TeamAlreadyExistsError, TeamNotFoundError
 from schemas.teamSchema import PlayerSchema, TeamAddModel, TeamResponse
 from services import team_service
 from utils.dependencies import CurrentUser, UoWDep
+from utils.user_utils import get_current_user
 
-router = APIRouter(tags=["teams"])
+router = APIRouter(
+    tags=["teams"], dependencies=[Security(get_current_user, scopes=["teams"])]
+)
 
 
 @router.get("/teams", response_model=list[TeamResponse])

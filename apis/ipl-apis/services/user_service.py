@@ -49,6 +49,7 @@ def login(uow: AbstractUnitOfWork, form: OAuth2PasswordRequestForm) -> Tokens:
             "sub": user_db.email,
             "username": user_db.name,
             "exp": datetime.now() + timedelta(minutes=10),
+            "scopes": " ".join(form.scopes),
         },
         "JustRandomJWTLearningString",
         "HS256",
