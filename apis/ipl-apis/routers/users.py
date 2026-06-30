@@ -1,13 +1,16 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, HTTPException, status
+from fastapi import APIRouter, Body, HTTPException, Security, status
 
 from exceptions.user_exceptions import UserAlreadyExistsError
 from models.user_models import UserBase, UserInput
 from services import user_service
 from utils.dependencies import CurrentUser, UoWDep
+from utils.user_utils import get_current_user
 
-router = APIRouter(tags=["Users"])
+router = APIRouter(
+    tags=["Users"], dependencies=[Security(get_current_user, scopes=["users"])]
+)
 
 
 @router.get(

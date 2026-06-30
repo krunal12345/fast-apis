@@ -12,6 +12,9 @@ import jwt
 from schemas.user_models import UserBase
 from sqlmodel import SQLModel, create_engine
 
+from utils.settings import get_settings
+
+
 database_name = "ipldatabase.db"
 database_url = f"sqlite:///{database_name}"
 connect_args = {"check_same_thread": False}
@@ -35,10 +38,11 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 def validate_jwt_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
+        settings = get_settings()
         claims = jwt.decode(
             credentials.credentials,
-            "JustRandomJWTLearningString",
-            algorithms=["HS256"],
+            settings.jwt_secret_key,
+            algorithms=settings.jwt_algorithm,
         )
         return claims
     except Exception:
@@ -49,10 +53,11 @@ def get_current_user(
     security_scopes: SecurityScopes, token: Annotated[str, Depends(oauth2_scheme)]
 ) -> UserBase:
     try:
+        settings = get_settings()
         claims = jwt.decode(
             token,
-            "JustRandomJWTLearningString",
-            algorithms=["HS256"],
+            settings.jwt_secret_key,
+            algorithms=settings.jwt_algorithm,
         )
 
         token_scopes: str = claims.get("scopes", "")

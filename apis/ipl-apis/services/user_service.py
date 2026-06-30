@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+from functools import lru_cache
+from utils.settings import Settings, get_settings
 
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -43,6 +45,8 @@ def login(uow: AbstractUnitOfWork, form: OAuth2PasswordRequestForm) -> Tokens:
     if not verify_password(form.password, user_db.password_hash):
         raise InvalidCredentialsError()
 
+    settings = get_settings()
+
     token = jwt.encode(
         {
             "id": user_db.id,
@@ -51,8 +55,8 @@ def login(uow: AbstractUnitOfWork, form: OAuth2PasswordRequestForm) -> Tokens:
             "exp": datetime.now() + timedelta(minutes=10),
             "scopes": " ".join(form.scopes),
         },
-        "JustRandomJWTLearningString",
-        "HS256",
+        settings.jwt_secret_key,
+        settings.jwt_algorithm,
     )
 
     return Tokens(access_token=token, token_type="bearer")
